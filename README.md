@@ -2,8 +2,11 @@
 Public : 2022.2/26 19:00以降  
 
 初めて中期(2週間)ヒューリスティックコンテスト [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) に参加した記録です。  
-色々勉強しながらトータルで関わった時間は50時間くらい、実装自体はおそらく22時間くらい。  
-markdown記法の練習も兼ねて色々書いています。
+色々寄り道勉強をしながらトータルでかかった時間は50時間くらい、実装自体はおそらく22時間くらい。  
+
+4.pyあたりから時間がなくて関数がまとまっていない、拡張性の悪いコードを量産してしまっています。  
+後のことを考えた事前設計の大事さや用意していた方が楽だった自動スクリプト、他の方の解法や書き方など、コンテスト中も終わってからも幅広い勉強になりました。  
+markdown記法の練習も兼ねて書いています。
 
 ## 最終結果
 score : 13,595,910,450 (1000 testcase)  
@@ -19,7 +22,9 @@ Rating : 616 -> 846 (緑)
 - スコアを実際に集計するのは `calc_total_score.py` にお任せ
 - `in/xxxx.txt` の数字は自動で4桁に0埋め
 - 実行中の進行状況を `[ 18 / 100 ]` のように出力
-- 公式が用意してくださったwindows用コンパイル済みバイナリ `tester.exe` と `in/` とpythonファイルが同ディレクトリにある設定です
+- 公式が用意してくださったwindows用コンパイル済みバイナリ `tester.exe` と `in/` と、作成したpythonファイルが同ディレクトリにある設定です
+- `out` に人間の次の動きの出力(ビジュアライザにコピペ用)
+- `score_log.txt` というファイルを毎回削除・新規作成してここにスコア結果を出力しています(他に良い方法がありそう)
 
 <br>
 
@@ -27,12 +32,12 @@ Rating : 616 -> 846 (緑)
 特定の入力ファイル `in/xxxx.txt` に対して `filename` を指定回数(`times`回)実行する  
 
 ```bash
-bash calc_selected_seed.sh filename x times
+./calc_selected_seed.sh filename x times
 ```
 
 ex ) `main.py` で `in/0014.txt` を5回実行
 ```bash
-bash calc_selected_seed.sh main.py 14 5
+./calc_selected_seed.sh main.py 14 5
 ```
 
 <br>
@@ -40,13 +45,13 @@ bash calc_selected_seed.sh main.py 14 5
 ### `calc_multi_seed.sh`
 `in/0000.txt ~ in/xxxx.txt` までを1回ずつ実行する  
 ```bash
-bash calc_multi_seed.sh filename x
+./calc_multi_seed.sh filename x
 ```
 
 ex ) `main.py` で `in/0000.txt ~ in/0099.txt` を実行
 
 ```bash
-bash calc_multi_seed.sh main.py 100
+./calc_multi_seed.sh main.py 100
 ```
 
 <br>
@@ -67,3 +72,8 @@ bash calc_multi_seed.sh main.py 100
 | [9.py](09.py) | 569,958,925 | 314/902人 | 321ms | 5.pyのparam 2.4 -> 2.7にして試し。 |
 | [10.py](10.py) | 571,457,204 | 335/926人 | 386ms | 中央をペアで挟んで塞ぐコードのバグが取れず8.pyを一旦最終提出。 |
 | [11.py](11.py) | - | - | - | 中央をペアで挟んで塞ぐ追加機能の途中まで。 |
+
+<br>
+
+### 動物を捕えきれない単独行動で終了したビジュアライザの様子
+![demo](gif_png/vis_4.gif)
