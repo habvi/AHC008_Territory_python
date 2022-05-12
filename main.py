@@ -1130,7 +1130,7 @@ def main():
     m = int(input())
     human_xy = [tuple(map(lambda x: int(x) - 1, input().split())) for _ in range(m)]
 
-    if n / m >= 2.4:
+    if n / m >= 2.5:
         g = Global_3(n, pets_xyk, m, human_xy)
         g.set_place()
         for _ in range(T):
