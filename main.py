@@ -3,12 +3,12 @@ from collections import defaultdict
 W = 30
 T = 300
 
-class Global:
-    def __init__(self):
-        self.n = int(input())
-        self.pets_xyk = [tuple(map(lambda x: int(x) - 1, input().split())) for _ in range(self.n)]
-        self.m = int(input())
-        self.human_xy = [tuple(map(lambda x: int(x) - 1, input().split())) for _ in range(self.m)]
+class Global_4:
+    def __init__(self, n, pets_xyk, m, human_xy):
+        self.n = n
+        self.pets_xyk = pets_xyk
+        self.m = m
+        self.human_xy = human_xy
         self.roles = [0] * self.m
         self.top5_row_destination = [2, 6, 10, 14, 18]
         self.col_aisle = [7, 15, 23]
@@ -34,6 +34,8 @@ class Global:
         self.no_human = set()
         self.no_human_later = []
         self.put_wall_later = set()
+        self.pair_list = []
+
 
     def set_all_place(self):
         self.place_all = defaultdict(list)
@@ -47,6 +49,7 @@ class Global:
         for i, (x, y) in enumerate(self.human_xy, 1):
             self.place_all[(x, y)].append(-i)
             self.human_place.append((x, y))
+
 
     def initial_set_roles(self):
         def _set_roles(hi, role):
@@ -70,10 +73,12 @@ class Global:
                     self.state_2[hi] = True
                     _set_roles(hi, 3)
 
+
         def _set_col_aisle(hi, place):
             self.number_of_each_aisle[place] += 1
             self.who_each_aisle[place].append(hi)
             self.where_my_aisle[hi] = place
+
 
         x, y, hi = human_xyi[0]
         left, middle, right = self.col_aisle
@@ -81,6 +86,7 @@ class Global:
             _set_col_aisle(hi, left)
         else:
             _set_col_aisle(hi, right)
+
 
         def _assign_rest_human(hi, x, y, place):
             if x % 2 == 1:
@@ -94,6 +100,7 @@ class Global:
                 else:
                     self.state_2[hi] = True
                     _set_roles(hi, 1000)
+
 
         rest_human = human_xyi[5:]
         rest_human.sort(key=lambda x: x[1])
@@ -123,6 +130,7 @@ class Global:
                 else:
                     _set_col_aisle(hi, right)
                     _assign_rest_human(hi, x, y, right)
+
 
     def reset_for_next(self):
         self.move_human_later = []
@@ -241,6 +249,7 @@ def do_state_1(g, hi):
 
 def do_state_2(g, hi):
     _, y = g.human_place[hi]
+
     if y in (0, 29):
         g.state_2[hi] = True
         g.new_human_roles.append((hi, 3))
@@ -719,6 +728,13 @@ def count_space_pet_left(g, x, y):
     ly, ry = both_side_left(y)
     for sy in range(ly, ry - 1):
         count_ += count_pets_xy(g, x, sy)
+    if x == 28:
+        if y == 7:
+            for sy in range(ly, ry):
+                count_ += count_pets_xy(g, x + 1, sy)
+        else:
+            for sy in range(ly + 1, ry):
+                count_ += count_pets_xy(g, x + 1, sy)
     return count_
 
 
@@ -727,6 +743,13 @@ def count_space_pet_right(g, x, y):
     ly, ry = both_side_right(y)
     for sy in range(ly + 2, ry + 1):
         count_ += count_pets_xy(g, x, sy)
+    if x == 28:
+        if y == 23:
+            for sy in range(ly + 1, ry + 1):
+                count_ += count_pets_xy(g, x + 1, sy)
+        else:
+            for sy in range(ly + 1, ry):
+                count_ += count_pets_xy(g, x + 1, sy)
     return count_
 
 
@@ -744,6 +767,7 @@ def do_state_200(g, hi):
 
     wall_left = is_wall_left(g, x, y)
     wall_right = is_wall_right(g, x, y)
+
     next_put_wall_left = (x, y - 1) in g.put_wall_later
     next_put_wall_right = (x, y + 1) in g.put_wall_later
 
@@ -776,6 +800,7 @@ def do_state_200(g, hi):
             dir = g.state_200_dir[hi]
             g.move_human_later.append((hi, dir))
             return dir
+
         elif number_pet_left and number_pet_right:
             if number_pet_left >= number_pet_right:
                 res = 'l'
@@ -784,10 +809,12 @@ def do_state_200(g, hi):
                 res = 'r'
                 g.put_wall_later.add((x, y + 1))
             return res
+
         elif number_pet_left:
             res = 'l'
             g.put_wall_later.add((x, y - 1))
             return res
+
         elif number_pet_right:
             res = 'r'
             g.put_wall_later.add((x, y + 1))
@@ -834,11 +861,13 @@ def do_state_1000(g, hi):
 
 
 def do_each_roles(g):
-    res = []
+    res = ['.'] * g.m
+
     for i in range(g.m):
         role = g.roles[i]
         if role == 0:
             next_move = '.'
+
         elif role == 1:
             next_move = do_state_1(g, i)
         elif role == 2:
@@ -895,7 +924,7 @@ def do_each_roles(g):
             next_move = do_state_1000(g, i)
         else:
             next_move = '.'
-        res.append(next_move)
+        res[i] = next_move
 
     return ''.join(res)
 
@@ -953,8 +982,167 @@ def move_pets(g, next_pets_move):
         update_place(g, x, y, i + 1)
 
 
+# old ----------------------------------------------------------------
+import random
+class Global_3:
+    def __init__(self, n, pets_xyk, m, human_xy):
+        self.n = n
+        self.pets_xyk = pets_xyk
+        self.m = m
+        self.human_xy = human_xy
+
+        self.is_all_human_reach_the_row = False
+        self.human_row_destination = [None, *sorted(random.sample(range(1, W, 2), k=self.m))]
+
+        self.is_human_col_left = [False] * (self.m + 1)
+        self.is_human_col_left[0] = True
+        self.is_human_col_right = [False] * (self.m + 1)
+        self.is_human_col_right[0] = True
+
+    def set_place(self):
+        self.place_all = defaultdict(list)
+        self.pets_place = [None]
+        self.pets_kind = [None]
+        for i, (x, y, k) in enumerate(self.pets_xyk, 1):
+            self.place_all[(x, y)].append(i)
+            self.pets_place.append((x, y))
+            self.pets_kind.append(k)
+
+        self.human_place = [None]
+        for i, (x, y) in enumerate(self.human_xy, 1):
+            self.place_all[(x, y)].append(-i)
+            self.human_place.append((x, y))
+
+    def get_next_xy(self, x, y, dir):
+        if dir == 'U':
+            return x - 1, y
+        elif dir == 'D':
+            return x + 1, y
+        elif dir == 'L':
+            return x, y - 1
+        else:
+            return x, y + 1
+
+    def erase_place(self, x, y, i):
+        self.place_all[(x, y)].remove(i)
+        if not self.place_all[(x, y)]:
+            del self.place_all[(x, y)]
+
+    def update_place(self, x, y, i):
+        if i > 0:
+            self.pets_place[i] = (x, y)
+        else:
+            self.human_place[-i] = (x, y)
+        self.place_all[(x, y)].append(i)
+
+    def is_pets_adjacent(self, x, y):
+        for dx, dy in zip((0, 1, 0, -1), (1, 0, -1, 0)):
+            nx, ny = x + dx, y + dy
+            if not (0 <= nx < W and 0 <= ny < W):
+                continue
+            for i in range(1, self.n + 1):
+                if i in self.place_all[(nx, ny)]:
+                    return True
+        return False
+
+    def move_human(self):
+        res = [None] * self.m
+        if not self.is_all_human_reach_the_row:
+            human_xi = sorted((x, i) for i, (x, _) in enumerate(self.human_place[1:], 1))
+
+            for (now_x, i), dest_x in zip(human_xi, self.human_row_destination[1:]):
+                if now_x == dest_x:
+                    res[i - 1] = '.'
+                    continue
+                if now_x < dest_x:
+                    res[i - 1] = 'D'
+                    dir = 'D'
+                else:
+                    res[i - 1] = 'U'
+                    dir = 'U'
+                x, y = self.human_place[i]
+                self.erase_place(x, y, -i)
+                x, y = self.get_next_xy(x, y, dir)
+                self.update_place(x, y, -i)
+
+            h_now_xs = sorted(x for x, _ in self.human_place[1:])
+            if h_now_xs == self.human_row_destination[1:]:
+                self.is_all_human_reach_the_row = True
+
+        else:
+            for i, (x, y) in enumerate(self.human_place[1:], 1):
+                if y == 0 and '#' in self.place_all[(x - 1, y)]:
+                    self.is_human_col_left[i] = True
+
+                if y == W - 1 and '#' in self.place_all[(x - 1, y)]:
+                    self.is_human_col_right[i] = True
+
+                if self.is_human_col_left[i] and self.is_human_col_right[i]:
+                    res[i - 1] = '.'
+                    continue
+
+                if not self.is_human_col_left[i]:
+                    if self.place_all[(x - 1, y)]:
+                        if '#' not in self.place_all[(x - 1, y)]:
+                            res[i - 1] = '.'
+                        else:
+                            res[i - 1] = 'L'
+                            self.erase_place(x, y, -i)
+                            x, y = self.get_next_xy(x, y, 'L')
+                            self.update_place(x, y, -i)
+                    else:
+                        if self.is_pets_adjacent(x - 1, y):
+                            res[i - 1] = '.'
+                        else:
+                            res[i - 1] = 'u'
+                            self.place_all[(x - 1, y)].append('#')
+                    continue
+
+                if self.place_all[(x - 1, y)]:
+                    if '#' not in self.place_all[(x - 1, y)]:
+                        res[i - 1] = '.'
+                    else:
+                        res[i - 1] = 'R'
+                        self.erase_place(x, y, -i)
+                        x, y = self.get_next_xy(x, y, 'R')
+                        self.update_place(x, y, -i)
+                else:
+                    if self.is_pets_adjacent(x - 1, y):
+                        res[i - 1] = '.'
+                    else:
+                        res[i - 1] = 'u'
+                        self.place_all[(x - 1, y)].append('#')
+        return ''.join(res)
+
+    def move_pets(self, nxt_pets_move):
+        for i, dir in enumerate(nxt_pets_move, 1):
+            x, y = self.pets_place[i]
+            self.erase_place(x, y, i)
+            for d in dir:
+                x, y = self.get_next_xy(x, y, d)
+            self.update_place(x, y, i)
+# old ----------------------------------------------------------------
+
+
 def main():
-    g = Global()
+    n = int(input())
+    pets_xyk = [tuple(map(lambda x: int(x) - 1, input().split())) for _ in range(n)]
+    m = int(input())
+    human_xy = [tuple(map(lambda x: int(x) - 1, input().split())) for _ in range(m)]
+
+    if n / m >= 2.4:
+        g = Global_3(n, pets_xyk, m, human_xy)
+        g.set_place()
+        for _ in range(T):
+            res = g.move_human()
+            print(res, flush=True)
+
+            nxt_pets_move = input().split()
+            g.move_pets(nxt_pets_move)
+        return
+
+
+    g = Global_4(n, pets_xyk, m, human_xy)
     g.set_all_place()
     g.initial_set_roles()
     for _ in range(T):
