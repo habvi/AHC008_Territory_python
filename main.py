@@ -1130,16 +1130,17 @@ def main():
     m = int(input())
     human_xy = [tuple(map(lambda x: int(x) - 1, input().split())) for _ in range(m)]
 
-    # if n / m >= 2.5:
-    #     g = Global_3(n, pets_xyk, m, human_xy)
-    #     g.set_place()
-    #     for _ in range(T):
-    #         res = g.move_human()
-    #         print(res, flush=True)
+    if n / m >= 2.6:
+        g = Global_3(n, pets_xyk, m, human_xy)
+        g.set_place()
+        for _ in range(T):
+            res = g.move_human()
+            print(res, flush=True)
 
-    #         nxt_pets_move = input().split()
-    #         g.move_pets(nxt_pets_move)
-    #     return
+            nxt_pets_move = input().split()
+            g.move_pets(nxt_pets_move)
+        return
+
 
     g = Global_4(n, pets_xyk, m, human_xy)
     g.set_all_place()
